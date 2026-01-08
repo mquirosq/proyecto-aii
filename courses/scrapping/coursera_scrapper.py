@@ -1,8 +1,8 @@
 from base_scrapper import BaseScraper
-import urllib
 from urllib import request
 from bs4 import BeautifulSoup
 import re
+from utils import extract_keywords
 
 BASE_URL = "https://www.coursera.org"
 
@@ -100,6 +100,7 @@ class CourseraScraper(BaseScraper):
                 "rating": rating,
                 "url": url,
                 "category": category,
+                "keywords": extract_keywords(title, description) if description else extract_keywords(title, ""),
             })
 
     
