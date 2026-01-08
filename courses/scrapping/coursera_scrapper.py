@@ -18,10 +18,15 @@ class CourseraScraper(BaseScraper):
         soup = BeautifulSoup(html, "html.parser")
         courses = []
 
-        categories_urls = [a.get('href') for a in soup.find('div', {'data-testid': "category-pills-group"}).find_all('a')]
+        # Collect browse links (categories), only '/browse/segment' or '/browse/segment/subsegment'
+        pattern = re.compile(r"^/browse/[^/?]+(?:/[^/?]+)?(?:\\?.*)?$")
+        categories_urls = set()
+        for a in soup.find_all("a", href=pattern):
+            path = a['href'].split('?')[0]
+            categories_urls.add(path)
 
         for category_url in categories_urls:
-            category = category_url.split('/')[-1]
+            category = category_url.rstrip('/').split('/')[-1]
             print(f"Scraping category: {category}")
             full_url = BASE_URL + category_url
             self.extract_category_course_info(full_url, courses, category)
@@ -32,36 +37,58 @@ class CourseraScraper(BaseScraper):
         html = response.read().decode('utf-8')
         soup = BeautifulSoup(html, "html.parser")
 
-        course_cards = soup.find_all('div', {'data-testid': "product-card-cds"})
+        course_links = set()
+        for a in soup.find_all("a", href=re.compile(
+            r"^/(learn|specializations|professional-certificates)/")):
+            href = a.get("href")
+            if not href:
+                continue
 
-        for card in course_cards:
-            url = BASE_URL + card.find('a', href=True).get('href')
-            if "degree" in url:
-                continue  # Skip degree programs
+            full_url = BASE_URL + href
 
+            if "/degrees/" in full_url:
+                continue                # Skip degree programs
+            
+            course_links.add(full_url)
+
+        for url in course_links:
+            print(f"  Scraping course: {url}")
             course_page = request.urlopen(url)
             course_html = course_page.read().decode('utf-8')
             course_soup = BeautifulSoup(course_html, "html.parser")
 
-            title = course_soup.find('h1', {'data-e2e': "hero-title"}).get_text().strip()
+            h1 = course_soup.find("h1")
+            title = h1.get_text(strip=True) if h1 else None
             
-            description = course_soup.find('div', {'data-testid': "cml-viewer"}).get_text().strip()
-            
+            meta = course_soup.find("meta", attrs={"name": "description"})
+            meta_content = meta["content"].strip() if meta and meta.get("content") else None
+
+            instructor = None
+            description = meta_content
+
+            if meta_content:
+                text = re.match(r'^\s*Offered by\s+(.+?)(?:[.:–—\-]\s*|\s{2,}|$)(.*)$', meta_content, re.I)
+                if text:
+                    instructor = text.group(1).strip()
+                    rest = text.group(2).strip()
+                    description = rest if rest else None
+
             rating_element = course_soup.find('div', attrs={'aria-label': re.compile(r'estrell(a|as)?|star', re.I)})
             rating = rating_element.get_text().strip() if rating_element else None
 
-            level_element = course_soup.find('div', string=re.compile(r'level', re.I), class_="css-fk6qfz")
-            level = level_element.get_text().replace('level', '').strip() if level_element else None
-
-            duration_element = course_soup.find('div', string=re.compile(r'to complete', re.I), class_="css-fk6qfz")
-            duration = duration_element.get_text().replace(' to complete', '').strip() if duration_element else None
-
-            # Secondary duration location
-            if duration is None:
-                duration_element = course_soup.find('div', string=re.compile(r'10\s*hours', re.I))
-                duration = duration_element.get_text().replace("at 10 hours a week", "").strip() if duration_element else None
-
-            instructor = course_soup.find('h3', string=re.compile(r'Offered by', re.I)).parent.find_next_sibling('div').find('span', class_="css-6ecy9b").get_text().strip()
+            level = None
+            duration = None
+            for text in course_soup.stripped_strings:
+                t = text.strip()
+                parts = [p.strip() for p in t.split('·')] if '·' in t else [t]
+                for part in parts:
+                    low = part.lower()
+                    if not level and any(x in low for x in ["beginner", "intermediate", "advanced"]):
+                        level = part.strip()
+                    if not duration and re.search(r"\d+\s*(?:-|to)\s*\d+\s*(months?|weeks?|hours?)", low):
+                        duration = part.replace('to complete', '').strip()
+                    if not duration and re.search(r"\d+\s*(months?|weeks?|hours?)", low):
+                        duration = re.sub(r'at\s*\d+\s*hours\s*a\s*week', '', part, flags=re.I).strip()
 
             courses.append({
                 "title": title,
