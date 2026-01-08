@@ -1,0 +1,3 @@
+django
+whoosh
+beautifulsoup4
