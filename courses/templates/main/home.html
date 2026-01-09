@@ -8,8 +8,47 @@
 {% block content %}
 <main class="container py-4">
 
-    <h1 class="mb-4">Curio</h1>
-    <p>Bienvenido a la página principal de Curio. Aquí podrás buscar, recuperar y recibir recomendaciones de cursos online de diversas plataformas educativas.</p>
+    <h1 class="mb-2">Curio</h1>
+    <p class="lead mb-2">
+        Descubre cursos online y rutas de aprendizaje personalizadas según tus intereses.
+    </p>
+    <p class="text-muted mb-3">
+        Buscador inteligente y recomendaciones basadas en el contenido de cada curso.
+    </p>
 
+    <section class="search-hero py-4 text-center">
+        <h2 class="h3 mb-3">¿Qué quieres aprender hoy?</h2>
+        <form action="/search/" method="get" class="search-form d-flex justify-content-center mb-2">
+            <input name="q" aria-label="Buscar cursos" class="form-control form-control-lg search-input" placeholder="Buscar cursos, tecnologías, temas…" />
+            <button class="btn btn-primary search-btn d-flex align-items-center justify-content-center" type="submit" aria-label="Buscar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.242 1.372a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+                </svg>
+            </button>
+        </form>
+        <div class="text-muted">Consulta cursos de multiples plataformas en un único lugar.</div>
+        
+        <div class="mt-2 small text-muted">
+            Sugerencias:
+            <a href="/search/?q=python" class="text-decoration-none">python</a> ·
+            <a href="/search/?q=machine+learning+beginner" class="text-decoration-none">machine learning beginner</a> ·
+            <a href="/search/?q=supply+chain" class="text-decoration-none">supply chain</a>
+        </div>
+    </section>
+
+
+    <section class="categories py-4">
+        <h2 class="h5 mb-3">Explora por áreas de conocimiento</h2>
+        <p class="text-muted mb-3">
+            Selecciones iniciales para empezar en cada temática.
+        </p>
+        <div class="pill-list">
+            {% for cat in categories %}
+                <a href="?category={{ cat.id }}" class="category-pill"><span class="pill-label">{{ cat.name }}</span> <span class="count">{{ cat.course_set.count }}</span></a>
+            {% empty %}
+                <div class="list-group-item">No hay categorías disponibles.</div>
+            {% endfor %}
+        </div>
+    </section>
 </main>
 {% endblock %}

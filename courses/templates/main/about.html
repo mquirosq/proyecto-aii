@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Acerca de — Curio{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h1 class="mb-3">Acerca de Curio</h1>
+      <p class="lead">Curio reúne cursos en línea de diversas plataformas para facilitar su búsqueda y comparación en un único lugar.</p>
+
+      <h4 class="mt-4">Objetivo</h4>
+      <p>Proveer una interfaz sencilla para explorar cursos, ver detalles y mantener una base de datos con contenido agregado mediante scrapers.</p>
+
+      <h4 class="mt-4">Autores</h4>
+      <p>Proyecto realizado como trabajo académico. Autores: equipo de desarrollo de la asignatura.</p>
+
+      <h4 class="mt-4">Contacto</h4>
+      <p>Para sugerencias o mejoras, abre un issue en el repositorio o contacta con el equipo docente.</p>
+
+      <a class="btn btn-primary mt-3" href="{% url 'home' %}">Volver al inicio</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container my-4">
   <h1>Proceso completado</h1>
-  <p>Los scrapers han terminado y los cursos han sido guardados e indexados.</p>
-  <a href="/courses/" class="btn btn-secondary mt-3">Ver cursos</a>
+  <p>Se han recopilado datos de {{ scrapers|join:", " }} para un total de {{ total_courses }} cursos.</p>
+  <a href="/courses/" class="btn btn-secondary text-white mt-3">Ver cursos</a>
 </div>
 {% endblock %}

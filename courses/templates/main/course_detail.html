@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} — Curio{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ course.title }}</h1>
+            <p class="text-muted">Plataforma: {{ course.platform.name }}</p>
+            {% if course.instructor %}
+                <p class="mb-1">Instructor: {{ course.instructor.name }}</p>
+            {% endif %}
+            {% if course.category %}
+                <p class="mb-1">Categoría: {{ course.category.name }}</p>
+            {% endif %}
+            {% if course.level %}
+                <p class="mb-1">Nivel: {{ course.get_level_display }}</p>
+            {% endif %}
+            {% if course.duration %}
+                <p class="mb-1">Duración aproximada: {{ course.duration }} horas</p>
+            {% endif %}
+            {% if course.rating %}
+                <p class="mb-1">Valoración: {{ course.rating }}/5</p>
+            {% endif %}
+
+            <hr>
+            <h5>Descripción</h5>
+            <p>{% if course.description %}{{ course.description }}{% else %}<em>Sin descripción disponible.</em>{% endif %}</p>
+
+            <a href="{{ course.url }}" class="btn btn-primary me-2" target="_blank" rel="noopener">Ir al curso</a>
+            <a href="{% url 'all_courses' %}" class="btn btn-outline-secondary">Volver a la lista</a>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <p class="mb-1"><strong>Última extracción:</strong><br>{{ course.last_scraped }}</p>
+                    <p class="mb-0"><strong>URL:</strong><br><a href="{{ course.url }}" target="_blank" rel="noopener">{{ course.url }}</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

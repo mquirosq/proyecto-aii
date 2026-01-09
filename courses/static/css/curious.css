@@ -96,6 +96,16 @@ h1:hover::after, h2:hover::after {
     border: none;
 }
 
+/* Action buttons: constrained width across all screen sizes to avoid overly wide buttons */
+.action-btn {
+    display: inline-block;
+    min-width: 110px;
+    max-width: 220px;
+    width: auto;
+    text-align: center;
+    vertical-align: middle;
+}
+
 /* Curiosity badges */
 .badge {
     border-radius: 6px;
@@ -362,4 +372,117 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, #3d5a8c, #8e44ad);
+}
+
+/* Category pill list */
+.categories .pill-list {
+    display: flex;
+    /* allow pills to wrap to multiple rows while keeping each pill content on one line */
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    justify-content: center; /* center rows */
+    align-items: center;
+    overflow-x: visible;
+}
+
+.category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(74,111,165,0.08), rgba(155,89,182,0.04));
+    color: var(--curious-dark);
+    text-decoration: none;
+    border: 1px solid rgba(74,111,165,0.08);
+    font-weight: 600;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+/* allow full category names to show: enable wrapping instead of truncation */
+.category-pill {
+    /* keep the category text on a single line */
+    white-space: nowrap;
+    text-overflow: unset;
+    overflow: visible;
+    max-width: none; /* allow pills to expand horizontally */
+    min-width: 0;
+    box-sizing: border-box;
+    justify-content: center;
+    padding-right: 0.9rem; /* ensure space before count */
+}
+
+.category-pill:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(74, 111, 165, 0.07);
+    background: linear-gradient(90deg, rgba(74,111,165,0.12), rgba(155,89,182,0.08));
+}
+
+.category-pill .count {
+    background: var(--curious-secondary);
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* control the label part so it truncates before the count */
+.category-pill .pill-label {
+    display: inline-block;
+    /* show full text on one line without breaking */
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: unset;
+    word-break: normal;
+    overflow-wrap: normal;
+    vertical-align: middle;
+}
+
+@media (max-width: 480px) {
+    .category-pill {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.9rem;
+        max-width: none; /* allow horizontal scroll instead of truncation */
+    }
+    .category-pill .pill-label {
+        max-width: none;
+    }
+}
+
+/* Search hero specific styles */
+.search-hero {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+
+.search-form .search-input {
+    border-radius: 9999px; /* extra pill */
+    box-shadow: 0 10px 30px rgba(44,62,80,0.14);
+    padding: 0.9rem 1.25rem;
+    max-width: 820px;
+    width: 65vw;
+    border-top-right-radius: 9999px;
+    border-bottom-right-radius: 9999px;
+}
+
+.search-form .search-btn {
+    border-radius: 50%; /* make circular */
+    padding: 0;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(74,111,165,0.15);
+    margin-left: 1rem;
+}
+
+@media (max-width: 576px) {
+    .search-form .search-input {
+        width: 80vw;
+    }
 }

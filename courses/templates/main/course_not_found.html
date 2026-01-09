@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Curso no encontrado — Curio{% endblock %}
+
+{% block content %}
+<div class="container my-5 text-center">
+    <h2>Curso no encontrado</h2>
+    <p class="lead">Lo sentimos, el curso solicitado no existe o ya no está disponible.</p>
+    <a href="{% url 'home' %}" class="btn btn-primary me-2">Ir al inicio</a>
+    <a href="{% url 'all_courses' %}" class="btn btn-outline-secondary">Ver todos los cursos</a>
+</div>
+{% endblock %}
