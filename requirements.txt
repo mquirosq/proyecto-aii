@@ -1,3 +1,4 @@
 django
 whoosh
 beautifulsoup4
+nltk
