@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="container py-4">
+
+    <h1 class="mb-4">Todos los cursos</h1>
+
+    {% if courses %}
+    <div class="list-group">
+        {% for course in courses %}
+        <a href="{{ course.url }}" class="list-group-item list-group-item-action" target="_blank" rel="noopener">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ course.title }}</h5>
+                <small class="text-muted">{{ course.platform }}</small>
+            </div>
+            <p class="mb-1">{{ course.description|truncatechars:200 }}</p>
+            <small class="text-muted">
+                {% if course.instructor %}Instructor: {{ course.instructor }} • {% endif %}
+                {% if course.level %}Nivel: {{ course.level }} • {% endif %}
+                {% if course.duration %}Duración: {{ course.duration }}h{% endif %}
+            </small>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No hay cursos disponibles.</p>
+    {% endif %}
+
+</main>
+{% endblock %}

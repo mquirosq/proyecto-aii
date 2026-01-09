@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Poblar Base de Datos{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h1>Popular la base de datos</h1>
+  <p>Selecciona uno o varios scrapers y confirma para ejecutar el proceso.</p>
+  
+  <form id="populateForm" method="post">
+    {% csrf_token %}
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="scrapers" value="coursera" id="scraperCoursera" checked>
+      <label class="form-check-label" for="scraperCoursera">Coursera</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="scrapers" value="edx" id="scraperEdx" checked>
+      <label class="form-check-label" for="scraperEdx">edX</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="scrapers" value="openlearn" id="scraperOpenLearn" checked>
+      <label class="form-check-label" for="scraperOpenLearn">OpenLearn</label>
+    </div>
+    <div class="mt-3">
+      <button id="runButton" type="submit" class="btn btn-primary">Ejecutar scrapers</button>
+    </div>
+    <div id="waitingMessage" class="mt-3" style="display:none;">
+      <div class="alert alert-info" role="alert">
+        Esto puede tardar un rato, por favor espere pacientemente y no recargue la página.
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+  {% load static %}
+  <script src="{% static 'js/populate.js' %}"></script>
+{% endblock %}
