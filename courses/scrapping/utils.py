@@ -2,6 +2,8 @@ import nltk
 from nltk.corpus import stopwords
 from nltk import data
 
+# STOPWORDS -----------------
+
 # Download stopwords from NLTK
 try:
     data.find('corpora/stopwords')
@@ -33,3 +35,17 @@ def extract_keywords(title, description, top_n=10):
     from collections import Counter
     counts = Counter(tokens)
     return [w for w, _ in counts.most_common(top_n)]
+
+
+
+# CATEGORY MAPPING -----------------
+def map_category(category):
+    """
+    Map various category names to a standard set.
+    """
+    category_mapping = {
+        # TODO: Add mapping once we have all categories collected
+    }
+    
+    cat_lower = category.lower() if category else ""
+    return category_mapping.get(cat_lower, category.title() if category else None)

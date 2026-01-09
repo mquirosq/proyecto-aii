@@ -1,8 +1,8 @@
-from base_scrapper import BaseScraper
+from .base_scrapper import BaseScraper
 from urllib import request
 from bs4 import BeautifulSoup
 import re
-from utils import extract_keywords, map_category
+from .utils import extract_keywords, map_category
 
 BASE_URL = "https://www.open.edu"
 
@@ -112,6 +112,7 @@ class openLearnScraper(BaseScraper):
                     "url": course_url,
                     "category": category,
                     "keywords": extract_keywords(title, description) if description else extract_keywords(title, ""),
+                    "last_scraped": self.get_current_datetime()
                 })
 
     
@@ -158,6 +159,14 @@ class openLearnScraper(BaseScraper):
 
             dur = course.get("duration")
             course["duration"] = parse_duration_text(str(dur)) if dur else None
+                
+            # Clean negative duration or rating
+            duration = course["duration"]
+            if duration is not None and duration < 0:
+                duration = None
+            rating = course["rating"]
+            if rating is not None and rating < 0:
+                rating = None
 
             # Normalize category names
             cat = course.get("category")

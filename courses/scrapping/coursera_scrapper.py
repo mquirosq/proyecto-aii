@@ -1,8 +1,8 @@
-from base_scrapper import BaseScraper
+from .base_scrapper import BaseScraper
 from urllib import request
 from bs4 import BeautifulSoup
 import re
-from utils import extract_keywords, map_category
+from .utils import extract_keywords, map_category
 
 BASE_URL = "https://www.coursera.org"
 
@@ -84,7 +84,10 @@ class CourseraScraper(BaseScraper):
                 for part in parts:
                     low = part.lower()
                     if not level and any(x in low for x in ["beginner", "intermediate", "advanced"]):
-                        level = part.strip()
+                        # Accept the part as `level` only if it contains at most 3 words - to avoid appearances in the description
+                        words = part.strip().split()
+                        if len(words) <= 3:
+                            level = ' '.join(words)
                     if not duration and re.search(r"\d+\s*(?:-|to)\s*\d+\s*(months?|weeks?|hours?)", low):
                         duration = part.replace('to complete', '').strip()
                     if not duration and re.search(r"\d+\s*(months?|weeks?|hours?)", low):
@@ -101,6 +104,7 @@ class CourseraScraper(BaseScraper):
                 "url": url,
                 "category": category,
                 "keywords": extract_keywords(title, description) if description else extract_keywords(title, ""),
+                "last_scraped": self.get_current_datetime()
             })
 
     
@@ -136,8 +140,17 @@ class CourseraScraper(BaseScraper):
 
             # Normalize level
             lvl = course.get("level")
-            if lvl:
-                course["level"] = lvl.strip().capitalize()
+            lvl = lvl.lower() if lvl else None
+            if lvl is None:
+                course["level"] = None
+            elif "beginner" in lvl:
+                course["level"] = "Beginner"
+            elif "intermediate" in lvl:
+                course["level"] = "Intermediate"
+            elif "advanced" in lvl:
+                course["level"] = "Advanced"
+            else:
+                course["level"] = None
 
             # Normalize rating to float when possible
             rt = course.get("rating")
@@ -149,6 +162,14 @@ class CourseraScraper(BaseScraper):
 
             dur = course.get("duration")
             course["duration"] = parse_duration_text(str(dur)) if dur else None
+
+            # Clean negative duration or rating
+            duration = course["duration"]
+            if duration is not None and duration < 0:
+                duration = None
+            rating = course["rating"]
+            if rating is not None and rating < 0:
+                rating = None
 
             # Normalize category names
             cat = course.get("category")

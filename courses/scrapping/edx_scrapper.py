@@ -1,9 +1,9 @@
-from base_scrapper import BaseScraper
+from .base_scrapper import BaseScraper
 from urllib import request
 from bs4 import BeautifulSoup
 import os
 import ssl
-from utils import extract_keywords, map_category
+from .utils import extract_keywords, map_category
 
 BASE_URL = "https://www.edx.org"
 BASE_LIST_URL = "https://www.edx.org/search?tab=course&page="
@@ -114,6 +114,7 @@ class EdxScraper(BaseScraper):
                 "url": course_url,
                 "category": category,
                 "keywords": extract_keywords(title, description) if description else extract_keywords(title, ""),
+                "last_scraped": self.get_current_datetime()
             })
     
     def normalize(self, data):
