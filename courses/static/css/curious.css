@@ -1,0 +1,365 @@
+
+:root {
+    --curious-primary: #4a6fa5;
+    --curious-secondary: #e8833a;
+    --curious-accent: #f4b942;
+    --curious-success: #5cb85c;
+    --curious-info: #17a2b8;
+    --curious-light: #f8f9fa;
+    --curious-dark: #2c3e50;
+    --curious-purple: #9b59b6;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth, professional animations */
+* {
+    transition: var(--transition-smooth);
+}
+
+/* Body refinements */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.7;
+    color: var(--curious-dark);
+}
+
+/* Headings with curiosity spark */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+}
+
+h1::after, h2::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--curious-secondary), var(--curious-accent));
+    transition: width 0.4s ease;
+}
+
+h1:hover::after, h2:hover::after {
+    width: 100%;
+}
+
+/* Interactive cards with hover elevation */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(74, 111, 165, 0.15);
+}
+
+/* Playful button styles */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.6rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--curious-primary), #3d5a8c);
+    border: none;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, var(--curious-secondary), #d16b1f);
+    border: none;
+}
+
+/* Curiosity badges */
+.badge {
+    border-radius: 6px;
+    padding: 0.4em 0.8em;
+    font-weight: 500;
+    font-size: 0.85em;
+}
+
+/* Interactive links with underline animation */
+a:not(.btn):not(.nav-link) {
+    color: var(--curious-primary);
+    text-decoration: none;
+    position: relative;
+    font-weight: 500;
+}
+
+a:not(.btn):not(.nav-link)::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: var(--curious-secondary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+a:not(.btn):not(.nav-link):hover::after {
+    transform: scaleX(1);
+}
+
+/* Playful form inputs */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    padding: 0.7rem 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--curious-primary);
+    box-shadow: 0 0 0 0.2rem rgba(74, 111, 165, 0.15);
+}
+
+/* Alert boxes with personality */
+.alert {
+    border-radius: 10px;
+    border-left: 4px solid;
+    padding: 1rem 1.5rem;
+    animation: slideInDown 0.5s ease;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-info {
+    border-left-color: var(--curious-info);
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));
+}
+
+.alert-success {
+    border-left-color: var(--curious-success);
+    background: linear-gradient(135deg, rgba(92, 184, 92, 0.1), rgba(92, 184, 92, 0.05));
+}
+
+/* Curious decorative elements */
+.curious-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--curious-accent);
+    margin: 0 5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+}
+
+/* Container enhancements */
+.container {
+    position: relative;
+}
+
+/* Highlighted sections */
+.highlight-section {
+    background: linear-gradient(135deg, rgba(244, 185, 66, 0.05), rgba(232, 131, 58, 0.05));
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border-left: 4px solid var(--curious-accent);
+}
+
+/* Icon enhancement (if using icons) */
+i, .icon {
+    transition: transform 0.3s ease;
+}
+
+i:hover, .icon:hover {
+    transform: rotate(15deg) scale(1.2);
+}
+
+/* Table styling */
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead {
+    background: linear-gradient(135deg, var(--curious-primary), #3d5a8c);
+    color: white;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(74, 111, 165, 0.05);
+}
+
+/* Loading spinner with curiosity */
+.spinner-curious {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(74, 111, 165, 0.2);
+    border-top-color: var(--curious-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Footer enhancement */
+footer {
+    background: linear-gradient(135deg, var(--curious-dark), #1a252f);
+    color: white;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+/* Breadcrumb curiosity */
+.breadcrumb {
+    background: transparent;
+    padding: 1rem 0;
+}
+
+.breadcrumb-item.active {
+    color: var(--curious-secondary);
+    font-weight: 600;
+}
+
+/* Tooltip enhancement */
+.tooltip {
+    font-size: 0.9rem;
+}
+
+/* Image hover effects */
+img {
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+img:hover {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+}
+
+/* Progress bars with gradient */
+.progress {
+    height: 10px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--curious-primary), var(--curious-purple));
+    border-radius: 10px;
+}
+
+/* Modal enhancements */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--curious-primary), #3d5a8c);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+/* List group curiosity */
+.list-group-item {
+    border-left: 3px solid transparent;
+    transition: border-color 0.3s ease, padding-left 0.3s ease;
+}
+
+.list-group-item:hover {
+    border-left-color: var(--curious-secondary);
+    padding-left: 1.5rem;
+    background-color: rgba(74, 111, 165, 0.03);
+}
+
+/* Responsive refinements */
+@media (max-width: 768px) {
+    h1::after, h2::after {
+        height: 2px;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+    }
+}
+
+/* Accessibility improvements */
+*:focus {
+    outline: 2px solid var(--curious-accent);
+    outline-offset: 2px;
+}
+
+button:focus, a:focus {
+    outline-color: var(--curious-secondary);
+}
+
+/* Scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar (for webkit browsers) */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--curious-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--curious-primary), var(--curious-purple));
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #3d5a8c, #8e44ad);
+}
