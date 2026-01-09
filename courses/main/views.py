@@ -12,8 +12,6 @@ def all_courses(request):
     return render(request, 'main/all_courses.html', {'courses': courses})
 
 def populate_with_data(request):
-    # Es una vista que te deja elegir entre los tres scrapers para popular la base de datos, puedes elegir uno o todos.
-    # Además te pide confirmación antes de ejecutar el proceso.
     if request.method == 'POST':
         selected_scrapers = request.POST.getlist('scrapers')
         if not selected_scrapers:

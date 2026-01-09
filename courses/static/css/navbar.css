@@ -16,6 +16,9 @@
   height: 36px;
   object-fit: contain;
   border-radius: 6px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  border-radius: 4px;
 }
 
 .nav-link.active {
