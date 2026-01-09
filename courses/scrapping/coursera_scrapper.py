@@ -6,7 +6,7 @@ from utils import extract_keywords
 
 BASE_URL = "https://www.coursera.org"
 
-HORAS_POR_SEMANA = 10
+HOURS_PER_WEEK = 10 # Estimated hours per week in Coursera for duration normalization
 
 class CourseraScraper(BaseScraper):
     def fetch(self):
@@ -114,12 +114,12 @@ class CourseraScraper(BaseScraper):
             # months
             m = re.search(r'(\d+(?:\.\d+)?)\s*months?', s)
             if m:
-                return int(round(float(m.group(1)) * 4 * HORAS_POR_SEMANA))
+                return int(round(float(m.group(1)) * 4 * HOURS_PER_WEEK))
 
             # weeks
             m = re.search(r'(\d+(?:\.\d+)?)\s*weeks?', s)
             if m:
-                return int(round(float(m.group(1)) * HORAS_POR_SEMANA))
+                return int(round(float(m.group(1)) * HOURS_PER_WEEK))
             
             # total hours
             m = re.search(r'(\d+(?:\.\d+)?)\s*(?:hours|hrs?)', s)
