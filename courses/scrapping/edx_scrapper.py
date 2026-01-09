@@ -1,10 +1,9 @@
 from base_scrapper import BaseScraper
 from urllib import request
 from bs4 import BeautifulSoup
-import re
 import os
 import ssl
-from utils import extract_keywords
+from utils import extract_keywords, map_category
 
 BASE_URL = "https://www.edx.org"
 BASE_LIST_URL = "https://www.edx.org/search?tab=course&page="
@@ -125,6 +124,14 @@ class EdxScraper(BaseScraper):
                 course["description"] = course["description"].strip()
             if course.get("instructor"):
                 course["instructor"] = course["instructor"].strip()
+
+            # Normalize category names
+            cat = course.get("category")
+            if cat:
+                course["category"] = cat.replace("_", " ").replace("-", " ").title()
+                course["category"] = course["category"].strip()
+                course["category"] = course["category"].replace(" & ", " and ")
+                course["category"] = map_category(course["category"])
         
         return data
     

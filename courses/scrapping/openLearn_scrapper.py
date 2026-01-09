@@ -2,7 +2,7 @@ from base_scrapper import BaseScraper
 from urllib import request
 from bs4 import BeautifulSoup
 import re
-from utils import extract_keywords
+from utils import extract_keywords, map_category
 
 BASE_URL = "https://www.open.edu"
 
@@ -129,11 +129,13 @@ class openLearnScraper(BaseScraper):
             return None
 
         for course in data:
-            # Clean title/description
+            # Clean title/description/instructor
             if course.get("title"):
                 course["title"] = course["title"].strip()
             if course.get("description"):
                 course["description"] = course["description"].strip()
+            if course.get("instructor"):
+                course["instructor"] = course["instructor"].strip()
 
             # Normalize level
             lvl = course.get("level")
@@ -157,9 +159,14 @@ class openLearnScraper(BaseScraper):
             dur = course.get("duration")
             course["duration"] = parse_duration_text(str(dur)) if dur else None
 
-            print(f"Normalized course: {course.get('title')}")
-            print(f"  Level: {course.get('level')}, Duration: {course.get('duration')}, Rating: {course.get('rating')}")
-            print("")
+            # Normalize category names
+            cat = course.get("category")
+            if cat:
+                course["category"] = cat.replace("_", " ").replace("-", " ").title()
+                course["category"] = course["category"].strip()
+                course["category"] = course["category"].replace(" & ", " and ")
+                course["category"] = map_category(course["category"])
+
         return data
     
 

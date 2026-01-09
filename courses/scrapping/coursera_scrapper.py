@@ -2,7 +2,7 @@ from base_scrapper import BaseScraper
 from urllib import request
 from bs4 import BeautifulSoup
 import re
-from utils import extract_keywords
+from utils import extract_keywords, map_category
 
 BASE_URL = "https://www.coursera.org"
 
@@ -149,6 +149,14 @@ class CourseraScraper(BaseScraper):
 
             dur = course.get("duration")
             course["duration"] = parse_duration_text(str(dur)) if dur else None
+
+            # Normalize category names
+            cat = course.get("category")
+            if cat:
+                course["category"] = cat.replace("_", " ").replace("-", " ").title()
+                course["category"] = course["category"].strip()
+                course["category"] = course["category"].replace(" & ", " and ")
+                course["category"] = map_category(course["category"])
 
         return data
     
