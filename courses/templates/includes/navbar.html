@@ -15,8 +15,28 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Inicio</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'all_courses' %}">Cursos</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'populate' %}">Popular</a></li>
+        {% if user.is_staff %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'populate' %}">Popular Base de Datos</a></li>
+        {% endif %}
         <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">Acerca de Curio</a></li>
+      </ul>
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'admin_panel' %}">Panel admin</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/">Django Admin</a></li>
+          {% endif %}
+          <li class="nav-item"><a class="nav-link" href="#">Hola, {{ user.get_short_name|default:user.username }}</a></li>
+          <li class="nav-item">
+            <form method="post" action="{% url 'logout' %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link p-0 d-inline-flex align-items-center" style="height:100%;">Cerrar sesión</button>
+            </form>
+          </li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Registrarse</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a></li>
+        {% endif %}
       </ul>
     </div>
   </div>

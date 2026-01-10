@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel administrador{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Panel administrador</h2>
+
+  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+
+  <div class="admin-metrics mb-4">
+    <div class="metric-card">
+      <div class="metric-icon">📚</div>
+      <div class="muted">Total cursos</div>
+      <div class="metric-value">{{ total_courses }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">🗂️</div>
+      <div class="muted">Categorías</div>
+      <div class="metric-value">{{ total_categories }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">👥</div>
+      <div class="muted">Usuarios</div>
+      <div class="metric-value">{{ total_users }}</div>
+    </div>
+  </div>
+
+  <h3 class="mb-3">Estadísticas por plataforma</h3>
+  <div class="grid-platforms">
+    {% for stat in platform_stats %}
+    <div class="grid-item">
+      <div class="platform-card">
+        <div class="platform-name">{{ stat.name }}</div>
+        <div class="small muted mb-2">{{ stat.course_count }} cursos</div>
+
+        <div class="mb-2">
+          <label class="muted small">Participación
+            <button type="button" class="info-btn" data-platform="{{ stat.name }}" aria-label="Explicar participación" title="Explicar participación">ⓘ</button>
+          </label>
+          <progress class="platform-progress" value="0" data-target="{{ stat.course_count }}" data-total="{{ total_courses }}" max="{{ total_courses }}"></progress>
+        </div>
+
+        <div class="d-flex justify-content-between small">
+          <div><strong>Rating</strong><div class="muted">{% if stat.avg_rating %}{{ stat.avg_rating|floatformat:2 }}{% else %}N/A{% endif %}</div></div>
+          <div><strong>Duración</strong><div class="muted">{% if stat.avg_duration %}{{ stat.avg_duration|floatformat:2 }} h{% else %}N/A{% endif %}</div></div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <p>No hay plataformas registradas.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+  <div id="explainModal" class="explain-modal" aria-hidden="true">
+    <div class="explain-modal-dialog">
+      <div class="explain-modal-header">
+        <strong id="modalTitle">¿Qué es la participación?</strong>
+        <button id="modalClose" class="modal-close" aria-label="Cerrar">✕</button>
+      </div>
+      <div id="modalBody" class="explain-modal-body">
+        <p>La participación indica el porcentaje del catálogo de cursos que pertenece a esta plataforma.</p>
+        <p><strong>Fórmula:</strong> participación = (cursos de la plataforma / total cursos) × 100</p>
+        <p id="modalPercent" class="explain-percent"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/admin_panel.js' %}"></script>
+{% endblock %}

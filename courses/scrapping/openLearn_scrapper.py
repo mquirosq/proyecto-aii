@@ -49,7 +49,6 @@ class openLearnScraper(BaseScraper):
         for page in range(0, max_pages ):
             print(f"  Scraping page {page + 1} of {max_pages} for category {category}")
             paged_url = f"{url}&page={page}"
-            print(f"    Paged URL: {paged_url}")
             response = request.urlopen(paged_url)
             page_html = response.read().decode('utf-8')
             page_soup = BeautifulSoup(page_html, "html.parser")
@@ -74,18 +73,12 @@ class openLearnScraper(BaseScraper):
                 if course_category.lower() != category.lower():
                     continue
 
-                print(f"    Level: {level}, Duration: {duration}")
-                print(f"    URL: {course_url}")
-                print("")
-
                 course_page = request.urlopen(course_url)
                 course_html = course_page.read().decode('utf-8')
                 course_soup = BeautifulSoup(course_html, "html.parser")
 
                 h1 = course_soup.find("h1", property="schema:name")
                 title = h1.get_text(strip=True) if h1 else None
-
-                print(f"    Title: {title}")
                 
                 rating_element = course_soup.find('span', class_='average-value')
                 rating = rating_element.get_text().strip() if rating_element else None

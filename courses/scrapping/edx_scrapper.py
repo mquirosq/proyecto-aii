@@ -7,7 +7,7 @@ from .utils import extract_keywords, map_category
 
 BASE_URL = "https://www.edx.org"
 BASE_LIST_URL = "https://www.edx.org/search?tab=course&page="
-PAGES = 42  # Total pages to scrape (estimated, as edX does not provide total count directly)
+PAGES = 1  # Total pages to scrape (using 1 as edX from urllib gets limited data without JS rendering)
 
 class EdxScraper(BaseScraper):
     def fetch(self):
@@ -42,7 +42,6 @@ class EdxScraper(BaseScraper):
         courses = []
 
         total_pages = PAGES
-        print(f"Detected total pages: {total_pages}")
 
         for page in range(1, total_pages + 1):
             print(f"Scraping page: {page} of {total_pages}")

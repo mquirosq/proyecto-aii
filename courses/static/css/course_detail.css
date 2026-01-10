@@ -1,0 +1,14 @@
+/* course_detail specific styles */
+/* Paleta y estilos específicos para la vista de curso */
+.card.shadow-sm { border-radius: .75rem; border: 0; overflow: hidden; }
+.card.shadow-sm .card-body { background: linear-gradient(180deg,#ffffff, #fbfcff); }
+.badge.bg-info { background-color: #e6f7ff !important; color: #0b5cff !important; }
+.btn-primary { background-color: #0b5cff; border-color: #0b5cff; }
+.btn-primary:hover { background-color: #094fb8; border-color: #094fb8; }
+.rating i { font-size: 1.05rem; margin-right: 2px; }
+.text-truncate a { text-decoration: underline; }
+
+@media (max-width: 576px) {
+  .card.shadow-sm .card-body { padding: 1rem; }
+  .rating i { font-size: 1.15rem; }
+}

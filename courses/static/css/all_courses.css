@@ -1,0 +1,75 @@
+.filters-card { border-radius: .5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.course-card .meta { font-size: .9rem; }
+.course-card .course-desc { color: #4b5563; }
+.filter-sm { height: calc(2.25rem + 2px); }
+.badge-muted { background: #f1f5f9; color: #334155; }
+.badge-duration { background: #dbeeff; color: #0f172a; }
+
+.badge-score { background: #fff7cc; color: #7a5800; }
+
+.filters-row { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; }
+.filters-row .filter-item { flex: 1 1 160px; min-width: 140px; }
+.filters-row .filter-action { flex: 0 0 auto; }
+@media (max-width: 576px) {
+    .filters-row .filter-item { flex-basis: 48%; }
+}
+
+/* Search bar styling */
+.filters-card .input-group {
+    background: #ffffff;
+    border-radius: .6rem;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(2,6,23,0.04);
+    border: 1px solid rgba(15,23,42,0.06);
+}
+.filters-card .input-group #search-icon {
+    background: transparent;
+    border: none;
+    padding: .45rem .6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.filters-card .input-group #search-icon svg {
+    width: 18px;
+    height: 18px;
+    color: #2563eb; /* nicer blue */
+    opacity: .95;
+}
+.filters-card .input-group .form-control.form-control-sm {
+    border: none;
+    padding: .45rem .6rem;
+    background: transparent;
+}
+.filters-card .input-group .form-control.form-control-sm:focus {
+    box-shadow: none;
+    outline: none;
+}
+.filters-card .input-group .form-control::placeholder {
+    color: #6b7280;
+}
+
+/* Order select specific styling */
+.filters-card .input-group #order-icon {
+    padding: .35rem .5rem;
+}
+.filters-card .input-group select#order-select {
+    border: none;
+    background: transparent;
+    padding: .45rem .6rem;
+    max-width: 260px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.filters-card .input-group select#order-select:focus {
+    outline: none;
+    box-shadow: none;
+}
+.filters-card .input-group #order-icon svg { color: #475569; }
+.filters-card .input-group.select-compact { display: inline-flex; align-items: center; gap: .25rem; }
+
+/* Small tweak: visually separate order control on small screens */
+@media (max-width: 576px) {
+    .filters-card .input-group select#order-select { max-width: 100%; }
+}

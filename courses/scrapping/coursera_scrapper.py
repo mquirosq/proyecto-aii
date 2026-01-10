@@ -71,7 +71,7 @@ class CourseraScraper(BaseScraper):
                 if text:
                     instructor = text.group(1).strip()
                     rest = text.group(2).strip()
-                    description = rest if rest else None
+                    description = rest if rest else None # Descriptions in coursera are limited by js rendering
 
             rating_element = course_soup.find('div', attrs={'aria-label': re.compile(r'estrell(a|as)?|star', re.I)})
             rating = rating_element.get_text().strip() if rating_element else None

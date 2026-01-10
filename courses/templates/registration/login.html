@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<style>
+  .login-card { max-width: 480px; margin: 48px auto; }
+  .login-card .card-body { padding: 2rem; }
+  .login-card input[name="username"],
+  .login-card input[name="password"] {
+    width: 100%;
+    padding: .5rem .75rem;
+    border-radius: .375rem;
+    border: 1px solid #ced4da;
+    box-sizing: border-box;
+  }
+  .login-card .form-label { font-weight: 600; }
+  .login-card .btn-primary { width: auto; padding: .45rem 1.1rem; display: inline-block; min-width: 140px; }
+</style>
+
+<div class="login-card">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="card-title mb-3">Iniciar sesión</h3>
+
+      {% if form.non_field_errors or form.errors %}
+        <div class="alert alert-danger">Usuario o contraseña incorrectos.</div>
+    {% endif %}
+    
+      <form method="post" novalidate class="mt-2">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label for="id_username" class="form-label">Usuario</label>
+          {{ form.username }}
+        </div>
+
+        <div class="mb-3">
+          <label for="id_password" class="form-label">Contraseña</label>
+          {{ form.password }}
+        </div>
+
+        <div class="d-flex justify-content-center">
+          <button type="submit" class="btn btn-primary">Acceder</button>
+        </div>
+      </form>
+
+      <p class="mt-3 text-center mb-0">¿No tienes cuenta? <a href="{% url 'signup' %}">Regístrate</a></p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

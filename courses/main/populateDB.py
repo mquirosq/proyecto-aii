@@ -15,8 +15,7 @@ def save_courses_dB(courses):
         # --- Platform ---
         platform_name = course.get("platform") or "Unknown"
         platform_obj, _ = Platform.objects.get_or_create(
-            name=platform_name,
-            defaults={"description": "", "url": ""}
+            name=platform_name
         )
 
         # --- Category ---
