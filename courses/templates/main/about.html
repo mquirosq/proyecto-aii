@@ -4,20 +4,75 @@
 {% block content %}
 <div class="container my-5">
   <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-9 col-lg-8">
+
       <h1 class="mb-3">Acerca de Curio</h1>
-      <p class="lead">Curio reúne cursos en línea de diversas plataformas para facilitar su búsqueda y comparación en un único lugar.</p>
+      <p class="lead">
+        Curio es una plataforma web que centraliza cursos online de distintas plataformas (
+          <a href="https://www.coursera.org" target="_blank" rel="noopener noreferrer">Coursera</a>, 
+          <a href="https://www.edx.org" target="_blank" rel="noopener noreferrer">edX</a> y 
+          <a href="https://www.open.edu/openlearn/" target="_blank" rel="noopener noreferrer">OpenLearn</a>)
+        para facilitar su búsqueda, comparación y recomendación personalizada.
+      </p>
 
-      <h4 class="mt-4">Objetivo</h4>
-      <p>Proveer una interfaz sencilla para explorar cursos, ver detalles y mantener una base de datos con contenido agregado mediante scrapers.</p>
+      <hr class="my-4">
 
-      <h4 class="mt-4">Autores</h4>
-      <p>Proyecto realizado como trabajo académico. Autores: equipo de desarrollo de la asignatura.</p>
+      <h4>Objetivo del proyecto</h4>
+      <p>
+        El objetivo de Curio es ayudar a los usuarios a descubrir cursos relevantes
+        de forma rápida e inteligente, evitando tener que buscar  entre múltiples
+        plataformas de cursos online.
+      </p>
+      <p>
+        Curio ha sido desarrollado como parte de la asignatura de
+        <strong>AII</strong>,
+        aplicando técnicas reales de recuperación de información y recomendación.
+      </p>
 
-      <h4 class="mt-4">Contacto</h4>
-      <p>Para sugerencias o mejoras, abre un issue en el repositorio o contacta con el equipo docente.</p>
+      <h4 class="mt-4">Búsqueda y exploración</h4>
+      <p>
+        Curio permite buscar cursos utilizando un motor de búsqueda basado en
+        <strong>Whoosh</strong>, teniendo en cuenta el título, la descripción y las palabras clave de cada curso.
+        Además, ofrece filtros avanzados por:
+      </p>
+      <ul>
+        <li>Plataforma</li>
+        <li>Categoría</li>
+        <li>Nivel</li>
+        <li>Duración</li>
+        <li>Puntuación</li>
+        <li>Instructor</li>
+      </ul>
 
-      <a class="btn btn-primary mt-3" href="{% url 'home' %}">Volver al inicio</a>
+      <h4 class="mt-4">Recomendaciones inteligentes</h4>
+      <p>
+        La plataforma incorpora un <strong>sistema de recomendación híbrido</strong> que combina:
+      </p>
+      <ul>
+        <li>
+          <strong>Recomendación basada en contenido</strong>, utilizando características
+          del curso (categoría, nivel, duración, palabras clave, etc.) y el historial
+          del usuario.
+        </li>
+        <li>
+          <strong>Recomendación colaborativa</strong>, basada en la similitud entre usuarios
+          y sus interacciones con los cursos.
+        </li>
+      </ul>
+      <p>
+        Las recomendaciones se adaptan al comportamiento del usuario mediante likes,
+        dislikes y visualizaciones (rating implícito), dando más peso a las interacciones recientes.
+      </p>
+
+      <h4 class="mt-4">Tecnologías utilizadas</h4>
+      <ul>
+        <li><strong>Django</strong> para el backend y la gestión de datos.</li>
+        <li><strong>SQLite</strong> como base de datos.</li>
+        <li><strong>Whoosh</strong> como motor de búsqueda.</li>
+        <li><strong>Python</strong> para la lógica de recomendación y scraping.</li>
+        <li><strong>Bootstrap</strong> para la interfaz de usuario.</li>
+      </ul>
+
     </div>
   </div>
 </div>

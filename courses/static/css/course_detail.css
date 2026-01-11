@@ -12,3 +12,100 @@
   .card.shadow-sm .card-body { padding: 1rem; }
   .rating i { font-size: 1.15rem; }
 }
+
+/* Make carousel control icons clearly visible on light backgrounds */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-size: 1.25rem 1.25rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: rgba(59,130,246,0.95);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 3rem;
+  top: 50%;
+  /* do not set transform here; individual controls will use transforms that
+     don't affect layout so they won't create horizontal scroll */
+  z-index: 3;
+  position: absolute;
+}
+
+/* Slightly enlarge controls on small screens for touch */
+@media (max-width: 576px) {
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon { width: 3rem; height: 3rem; }
+}
+
+/* Ensure controls are positioned outside the carousel cards and always visible */
+.carousel {
+  position: relative;
+}
+.carousel .carousel-inner {
+  overflow: visible; /* allow controls to sit outside slides */
+}
+.carousel .carousel-control-prev,
+.carousel .carousel-control-next {
+  opacity: 1 !important;
+}
+/* Position controls so they overlap edges but remain inside container bounds
+  to avoid creating horizontal scrollbars */
+.carousel .carousel-control-prev { left: 0.75rem; transform: translate(-50%, -50%); }
+.carousel .carousel-control-next { right: 0.75rem; transform: translate(50%, -50%); }
+
+/* Strong blue color and ensure the default SVG icon is visible on top */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: #3b82f6;
+  background-blend-mode: normal;
+  filter: none;
+}
+
+/* Make controls larger on desktops for better click targets */
+@media (min-width: 768px) {
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon { width: 3.2rem; height: 3.2rem; }
+  .carousel .carousel-control-prev { left: 1.5rem; transform: translate(-60%, -50%); }
+  .carousel .carousel-control-next { right: 1.5rem; transform: translate(60%, -50%); }
+}
+
+/* Ensure controls are not clipped and use white SVG arrows on blue circular background */
+.carousel { overflow: visible !important; }
+.carousel-control-prev,
+.carousel-control-next { z-index: 9999 !important; }
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: #3b82f6 !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 1.25rem 1.25rem !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
+}
+
+/* Top pill color (override bootstrap primary for this badge) */
+.badge.top-pill {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+/* Hide horizontal scrollbar for the similar courses carousel wrapper */
+.similar-carousel-wrapper {
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Prev arrow (white) */
+.carousel-control-prev-icon {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%23ffffff' d='M11.354 1.646a.5.5 0 0 0-.708 0L4.5 7.793l6.146 6.147a.5.5 0 0 0 .708-.708L5.707 8 11.354 2.354a.5.5 0 0 0 0-.708z'/></svg>") !important;
+}
+
+/* Next arrow (white) */
+.carousel-control-next-icon {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%23ffffff' d='M4.646 1.646a.5.5 0 0 1 .708 0L11.5 7.793 5.354 13.94a.5.5 0 1 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/></svg>") !important;
+}

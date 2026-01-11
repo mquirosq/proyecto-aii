@@ -58,7 +58,7 @@ def init_whoosh(index_dir=WHOOSH_INDEX_DIR):
         url=ID(stored=True, unique=True),
         title=TEXT(stored=True),
         description=TEXT(stored=True),
-        category=TEXT(stored=False, phrase=False),
+        category=KEYWORD(stored=False, lowercase=True),
         level = KEYWORD(lowercase=True, stored=False),
         platform=KEYWORD(lowercase=True, stored=False),
         instructor=KEYWORD(lowercase=True, stored=False),
@@ -86,20 +86,16 @@ def open_whoosh(index_dir=WHOOSH_INDEX_DIR):
 def index_courses(courses, ix):
     writer = ix.writer()
 
+    print("WHOOSH")
     for course in courses:
-        # Extract string values from FK objects
-        platform_name = course.platform.name if hasattr(course, "platform") and course.platform else ""
-        category_name = course.category.name if hasattr(course, "category") and course.category else ""
-        instructor_name = course.instructor.name if hasattr(course, "instructor") and course.instructor else ""
-
         writer.update_document(
             url=course["url"],
             title=course["title"] or "",
             description=course["description"] or "",
-            platform=platform_name,
+            platform=course["platform"] or "",
             level=course["level"] or "",
-            category=category_name,
-            instructor=instructor_name,
+            category=course["category"] or "",
+            instructor=course["instructor"] or "",
             duration=course["duration"] or None,
             rating=course["rating"] or None,
             last_scraped=course["last_scraped"],

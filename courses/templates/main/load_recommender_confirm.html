@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Cargar datos del sistema de recomendación{% endblock %}
+
+{% block content %}
+<div class="container my-4" style="max-width:900px;">
+  <h1>Cargar datos del sistema de recomendación</h1>
+  <p>Esta operación recalcula y guarda los datos precomputados (índices, features, similitudes) usados por los recomendadores. Puede tardar varios minutos.</p>
+
+  <form id="loadRecommenderForm" method="post">
+    {% csrf_token %}
+    <p>Por favor confirma para iniciar el proceso. No recargues la página mientras se procesa.</p>
+
+    <div class="mt-3">
+      <button id="confirmBtn" type="submit" class="btn btn-primary" style="color:#fff !important">Confirmar</button>
+      <a href="{% url 'admin_panel' %}" class="btn btn-secondary" style="color: #fff !important">Cancelar</a>
+    </div>
+
+    <div id="waitingMessage" class="mt-3" style="display:none;">
+      <div class="alert alert-info" role="alert">
+        Esto puede tardar un rato, por favor espere pacientemente y no recargue la página.
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  {% load static %}
+  <script src="{% static 'js/populate.js' %}"></script>
+  <script>
+    // Reuse populate.js behavior: show waitingMessage on submit
+    (function(){
+      var form = document.getElementById('loadRecommenderForm');
+      if(!form) return;
+      form.addEventListener('submit', function(){
+        var btn = document.getElementById('confirmBtn');
+        if(btn) btn.disabled = true;
+        var wait = document.getElementById('waitingMessage');
+        if(wait) wait.style.display = 'block';
+      });
+    })();
+  </script>
+{% endblock %}

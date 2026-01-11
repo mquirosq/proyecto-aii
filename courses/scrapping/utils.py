@@ -13,7 +13,15 @@ except LookupError:
 STOPWORDS = set(stopwords.words('english'))
 
 # Add common words specific to online courses that are not relevant to content of courses
-STOPWORDS.update({"course", "learn", "program", "certification", "certificate", "online", "introduction"})
+STOPWORDS.update({"course", "learn", "program", "certification", "certificate", "online", 
+                  "introduction", "specialization", "professional", "development", "fundamentals", 
+                  "basics", "free", "enroll", "foundational", "career", "beginner", "advanced", 
+                  "intermediate", "study", "module", "topic", "topics", "week", "weeks", "duration",
+                  "available", "upcoming", "upskill", "path", "skills", "skill", "level", "including",
+                  "knowledge", "understanding", "ability", "abilities", "concepts", "intended", "audience",
+                  "build", "building", "practical", "theory", "hands-on", "hands", "projects", "project",
+                  "work", "works", "real-world", "real", "world", "case", "cases", "case studies", "study",
+                  "basic", "part", "parts", "introduction", "intros", "intro", "become", "enroll", "free"})
 
 def clean_text(text):
     """
@@ -27,7 +35,7 @@ def clean_text(text):
     return text
 
 
-def extract_keywords(title, description, top_n=10):
+def extract_keywords(title, description, top_n=20):
     text = f"{title} {description}" if description else title
     text = clean_text(text)
     tokens = [w for w in text.split() if w not in STOPWORDS and len(w) > 2]
@@ -44,7 +52,8 @@ def map_category(category):
     Map various category names to a standard set.
     """
     category_mapping = {
-        # TODO: Add mapping once we have all categories collected
+        # Possible exptension
+        # Won't map anything for now
     }
     
     cat_lower = category.lower() if category else ""

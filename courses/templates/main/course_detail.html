@@ -25,7 +25,7 @@
                         {% if user.is_authenticated %}
                         <form method="post" action="{% url 'toggle_feedback' course.id 'like' %}" class="d-inline" data-action="like">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-sm {% if course.is_liked %}btn-success{% else %}btn-outline-primary{% endif %}" title="Me gusta">
+                            <button type="submit" class="btn btn-sm {% if course.is_liked %}btn-success{% else %}btn-outline-secondary{% endif %}" title="Me gusta">
                                 <i class="bi bi-hand-thumbs-up-fill"></i>
                             </button>
                         </form>
@@ -79,6 +79,64 @@
         </div>
     </div>
 </div>
+
+{% if similar_courses %}
+<div class="container my-4">
+    <h5>Cursos similares</h5>
+    <div class="row">
+        {% for s in similar_courses %}
+            <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title d-flex justify-content-between align-items-start">
+                            <a href="{% url 'course_detail' s.id %}">{{ s.title }}</a>
+                            {% if s.rank %}
+                                <span class="badge bg-primary top-pill ms-2">Top {{ s.rank }}</span>
+                            {% endif %}
+                        </h6>
+                        <p class="small text-muted mb-1">{{ s.platform.name }}{% if s.instructor %} — {{ s.instructor.name }}{% endif %}</p>
+                        <p class="small text-muted mb-1">Duración: {% if s.duration %}{{ s.duration }} h{% else %}—{% endif %}</p>
+                        {% if s.level %}
+                            <p class="small text-muted mb-1">Nivel: {{ s.get_level_display }}</p>
+                        {% endif %}
+                        {% if s.match_reasons %}
+                            <p class="small text-muted mb-0">Razones: {{ s.match_reasons }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if next_courses %}
+<div class="container my-4">
+    <h5>Siguientes pasos recomendados</h5>
+    <div class="row">
+        {% for n in next_courses %}
+            <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title d-flex justify-content-between align-items-start">
+                            <a href="{% url 'course_detail' n.id %}">{{ n.title }}</a>
+                            {% if n.rank %}
+                                <span class="badge bg-primary top-pill ms-2">Top {{ n.rank }}</span>
+                            {% endif %}
+                        </h6>
+                        <p class="small text-muted mb-1">{{ n.platform.name }}{% if n.instructor %} — {{ n.instructor.name }}{% endif %}</p>
+                        <p class="small text-muted mb-1">Duración: {% if n.duration %}{{ n.duration }} h{% else %}—{% endif %}</p>
+                        <p class="small text-muted mb-1">Nivel: {{ n.get_level_display }}</p>
+                        {% if n.match_reasons %}
+                            <p class="small text-muted mb-0">Razones: {{ n.match_reasons }}</p>
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
 {% if user.is_authenticated %}
     <script src="{% static 'js/course_detail_viewed.js' %}"></script>

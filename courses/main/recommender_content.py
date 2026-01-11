@@ -4,6 +4,10 @@ from scrapping.utils import extract_keywords
 from collections import defaultdict
 import math
 from django.utils import timezone
+from django.db.models import Q
+import shelve
+
+SHELVE_FILE = "precomputed_recommender_system_courses.db"
 
 # Weights for different features
 FEATURE_WEIGHTS = {
@@ -14,6 +18,13 @@ FEATURE_WEIGHTS = {
     "dur": 1.0,     
     "kw": 0.6,      
 }
+
+def load_precomputed_data():
+    """Load precomputed data from shelve."""
+    with shelve.open(SHELVE_FILE) as db:
+        course_features_dict = db.get('course_features', {})
+        item_sim = db.get('item_sim', {})
+    return course_features_dict, item_sim
 
 
 def get_user_feedback(user):
@@ -61,6 +72,9 @@ def course_features(course):
 def build_user_profile(user):
     profile = defaultdict(float)
 
+    # Try to use precomputed course features (fallback to computing on the fly)
+    course_features_dict, _ = load_precomputed_data()
+
     interactions = UserCourse.objects.filter(user=user)
 
     for uc in interactions:
@@ -82,7 +96,12 @@ def build_user_profile(user):
         if weight == 0:
             continue
 
-        for feat in course_features(uc.course):
+        # Prefer precomputed features keyed by course id (int or str), else compute
+        feats = course_features_dict.get(uc.course_id) or course_features_dict.get(str(uc.course_id))
+        if feats is None:
+            feats = course_features(uc.course)
+
+        for feat in feats:
             kind = feat.split(":", 1)[0]
             feat_weight = FEATURE_WEIGHTS.get(kind, 1.0)
             profile[feat] += weight * feat_weight
@@ -112,20 +131,28 @@ def similarity(user_profile, course_features):
     score = sum(user_profile.get(f, 0.0) for f in course_features)
     return score / len(course_features)
 
+def recommend_content_courses(user, limit=10):
+    # Load precomputed course features to avoid recomputing per candidate
+    course_features_dict, _ = load_precomputed_data()
 
-def recommend_courses(user, limit=10):
     user_profile = build_user_profile(user)
 
+    # Only consider courses the user explicitly liked or disliked as "interacted"
     interacted = set(
         UserCourse.objects
         .filter(user=user)
+        .filter(Q(liked=True) | Q(disliked=True))
         .values_list('course_id', flat=True)
     )
 
     recommendations = []
 
     for course in Course.objects.exclude(id__in=interacted):
-        score = similarity(user_profile, course_features(course))
+        feats = course_features_dict.get(course.id) or course_features_dict.get(str(course.id))
+        if feats is None:
+            feats = course_features(course)
+
+        score = similarity(user_profile, feats)
         if score > 0:
             recommendations.append((course, score))
 
@@ -134,7 +161,3 @@ def recommend_courses(user, limit=10):
 
     # Return list of dicts with course and score so templates can show the score
     return [{'course': c, 'score': s} for c, s in top]
-
-
-def recommend_for_anonymous(limit=10):
-    return Course.objects.order_by('-rating')[:limit]

@@ -1,18 +1,46 @@
 from .base_scrapper import BaseScraper
 from urllib import request
+import urllib.error
 from bs4 import BeautifulSoup
 import re
+import time
+import socket
 from .utils import extract_keywords, map_category
 
 BASE_URL = "https://www.coursera.org"
 
 HOURS_PER_WEEK = 10 # Estimated hours per week in Coursera for duration normalization
 
+# Coursera sometimes blocks requests if they are too frequent.
+DEFAULT_TIMEOUT = 10
+MAX_RETRIES = 3
+RETRY_BACKOFF = 1.5
+MAX_COURSES_PER_CATEGORY = 80
+
 class CourseraScraper(BaseScraper):
     def fetch(self):
         url = "https://www.coursera.org/courses?query=data%20science"
-        response = request.urlopen(url)
-        return response.read().decode('utf-8')
+        return self.fetch_url(url)
+
+    def fetch_url(self, url):
+        """Fetch a URL with retries, timeout and polite delay. Returns decoded HTML or None."""
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; Scraper/1.0; +https://example.com)"}
+        req = request.Request(url, headers=headers)
+        backoff = RETRY_BACKOFF
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                resp = request.urlopen(req, timeout=DEFAULT_TIMEOUT)
+                try:
+                    return resp.read().decode('utf-8')
+                except Exception:
+                    return resp.read().decode(errors='ignore')
+            except (urllib.error.HTTPError, urllib.error.URLError, socket.timeout):
+                if attempt == MAX_RETRIES:
+                    return None
+                time.sleep(backoff)
+                backoff *= RETRY_BACKOFF
+            except Exception:
+                return None
 
     def parse(self, html):
         soup = BeautifulSoup(html, "html.parser")
@@ -33,8 +61,9 @@ class CourseraScraper(BaseScraper):
         return courses
     
     def extract_category_course_info(self, url, courses, category):
-        response = request.urlopen(url)
-        html = response.read().decode('utf-8')
+        html = self.fetch_url(url)
+        if not html:
+            return
         soup = BeautifulSoup(html, "html.parser")
 
         course_links = set()
@@ -50,12 +79,16 @@ class CourseraScraper(BaseScraper):
                 continue                # Skip degree programs
             
             course_links.add(full_url)
+            if len(course_links) >= MAX_COURSES_PER_CATEGORY:
+                break
 
         for url in course_links:
             print(f"  Scraping course: {url}")
-            course_page = request.urlopen(url)
-            course_html = course_page.read().decode('utf-8')
+            course_html = self.fetch_url(url)
+            if not course_html:
+                continue
             course_soup = BeautifulSoup(course_html, "html.parser")
+            time.sleep(0.2)
 
             h1 = course_soup.find("h1")
             title = h1.get_text(strip=True) if h1 else None
@@ -178,6 +211,8 @@ class CourseraScraper(BaseScraper):
                 course["category"] = course["category"].strip()
                 course["category"] = course["category"].replace(" & ", " and ")
                 course["category"] = map_category(course["category"])
+
+            print(f"Normalized course category: {course.get('category')}")
 
         return data
     

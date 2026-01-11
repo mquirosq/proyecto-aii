@@ -10,15 +10,18 @@ from .populateDB import populate_database
 from .populateDB import open_whoosh
 from whoosh.qparser import MultifieldParser
 from whoosh.qparser import OrGroup
-from .recommender_content import recommend_courses, recommend_for_anonymous
-
+from .recommender import recommend_hybrid, recommend_for_anonymous
+from .recommender_utils import precalculate_data
+from whoosh.query import Term, And, NumericRange, Or
+from scrapping.utils import extract_keywords
+from datetime import datetime, timedelta
 
 # Create your views here.
 def home(request):
     categories = Category.objects.all()
     recommended_courses = []
     if request.user.is_authenticated:
-        recommended_courses = recommend_courses(request.user, limit=6)
+        recommended_courses = recommend_hybrid(request.user, limit=6)
     else:
         recommended_courses = recommend_for_anonymous(limit=6)
     
@@ -57,7 +60,7 @@ def all_courses(request):
                     qobj = parser.parse(query)
                     hits = searcher.search(qobj, limit=100)
                     urls_order = [hit['url'] for hit in hits]
-                    score_map = {hit['url']: getattr(hit, 'score', None) for hit in hits}
+                    score_map = {hit['url']: hit.score for hit in hits}
                     used_whoosh = True
                     if urls_order:
                         qs = qs.filter(url__in=urls_order)
@@ -178,12 +181,68 @@ def populate_with_data(request):
 
     return render(request, 'main/populate.html')
 
+@user_passes_test(lambda u: u.is_staff)
+def load_recommender_data(request):
+    if not request.user.is_staff:
+        messages.error(request, 'No tienes permiso para acceder a esta página.')
+        return redirect('home')
+
+    if request.method == 'POST':
+        precalculate_data()
+        messages.success(request, 'Datos del sistema de recomendación cargados correctamente.')
+        return redirect('admin_panel')
+
+    return render(request, 'main/load_recommender_confirm.html')
+
+def generate_match_reasons_details(base_course, candidate):
+    """Return textual reasons explaining similarity for course details."""
+    
+    reasons = []
+    
+    if base_course.instructor and candidate.instructor and base_course.instructor.id == candidate.instructor.id:
+        reasons.append('mismo instructor')
+    
+    if base_course.platform and candidate.platform and base_course.platform.id == candidate.platform.id:
+        reasons.append('misma plataforma')
+    
+    if getattr(base_course, 'category_id', None) and getattr(candidate, 'category_id', None) and base_course.category_id == candidate.category_id:
+        reasons.append('misma categoría')
+    
+    if getattr(base_course, 'level', None) and getattr(candidate, 'level', None) and base_course.level == candidate.level:
+        reasons.append('mismo nivel')
+    
+    if getattr(base_course, 'duration', None) and getattr(candidate, 'duration', None):
+        diff = abs(float(candidate.duration) - float(base_course.duration))
+        if diff == 0:
+            reasons.append('duración idéntica')
+        elif diff <= 5:
+            reasons.append('duración similar')
+    
+    if getattr(base_course, 'rating', None) and getattr(candidate, 'rating', None):
+        rating_diff = abs(float(candidate.rating) - float(base_course.rating))
+        if rating_diff <= 0.5:
+            reasons.append('puntuación similar')
+
+    base_course.keywords = extract_keywords(base_course.title, base_course.description)
+    candidate.keywords = extract_keywords(candidate.title, candidate.description)
+
+    if getattr(base_course, 'keywords', None) and getattr(candidate, 'keywords', None):
+        base_keywords = set(kw.strip().lower() for kw in (base_course.keywords or '') if kw.strip())
+        candidate_keywords = set(kw.strip().lower() for kw in (candidate.keywords or '') if kw.strip())
+        common_keywords = base_keywords.intersection(candidate_keywords)
+        
+        if common_keywords:
+            reasons.append(f'palabras clave en común (' + ', '.join(sorted(common_keywords)) + ')')
+
+    return ', '.join(reasons) if reasons else ''
+
 def course_detail(request, course_id):
     try:
         course = Course.objects.get(id=course_id)
     except Course.DoesNotExist:
         messages.error(request, 'El curso solicitado no existe.')
         return render(request, 'main/course_not_found.html')
+    
     # Attach user feedback flags for template
     if request.user.is_authenticated:
         uc = UserCourse.objects.filter(user=request.user, course=course).first()
@@ -193,7 +252,184 @@ def course_detail(request, course_id):
         setattr(course, 'is_liked', False)
         setattr(course, 'is_disliked', False)
 
-    return render(request, 'main/course_detail.html', {'course': course})
+    similar_courses = similar_courses_given_course(course)
+
+    next_courses = next_steps_given_course(course)
+
+    return render(request, 'main/course_detail.html', {
+        'course': course,
+        'similar_courses': similar_courses,
+        'next_courses': next_courses
+    })
+
+# Note the minscore from Whoosh may eliminate results that are slightly similar as they are not deemed relevant enough.
+
+def similar_courses_given_course(course):
+    """
+    Return a list of similar courses to the given course using Whoosh search.
+    Get courses with similar level, category, instructor, platform, duration of +- 5 hours,
+    similar keywords, rating of +- 0.5.
+    """
+    ix = open_whoosh()
+    similar_courses = Course.objects.none()
+    if ix:
+        try:
+            with ix.searcher() as searcher:
+                query_parts = []
+
+                # Duration ±5
+                if getattr(course, 'duration', None) is not None:
+                    dur = float(course.duration)
+                    query_parts.append(NumericRange('duration', dur - 5, dur + 5, boost=2.5))
+
+                # Rating ±0.5
+                if getattr(course, 'rating', None) is not None:
+                    r = float(course.rating)
+                    query_parts.append(NumericRange('rating', r - 0.5, r + 0.5, boost=1))
+
+                # Level
+                if getattr(course, 'level', None):
+                    query_parts.append(Term('level', course.level.lower(), boost=2.0))
+
+                # Instructor name
+                instr_name = None
+                if getattr(course, 'instructor', None):
+                    instr_name = getattr(course.instructor, 'name', None) or str(course.instructor)
+                if instr_name:
+                    query_parts.append(Term('instructor', instr_name.lower(), boost=2.0))
+
+                # Platform name
+                platform_name = None
+                if getattr(course, 'platform', None):
+                    platform_name = getattr(course.platform, 'name', None) or str(course.platform)
+                if platform_name:
+                    query_parts.append(Term('platform', platform_name.lower(), boost=1))
+
+                # Category name
+                cat_name = None
+                if getattr(course, 'category', None):
+                    cat_name = getattr(course.category, 'name', None) or str(course.category)
+                if cat_name:
+                    query_parts.append(Term('category', cat_name.lower(), boost=5.0))
+
+                # Keywords
+                keywords = extract_keywords(course.title, course.description)
+                keyword_boost = 5.0
+                keyword_terms = [Term('keywords', kw.strip().lower(), boost=keyword_boost) for kw in keywords if kw.strip()]
+                
+                # Build final query
+                final_query = None
+                all_parts = []
+                if query_parts:
+                    all_parts.extend(query_parts)
+                if keyword_terms:
+                    all_parts.extend(keyword_terms)
+                if all_parts:
+                    final_query = Or(all_parts)
+
+                if final_query is None:
+                    similar_courses = Course.objects.none()
+                else:
+                    results = searcher.search(final_query, limit=4)
+
+                    similar_list = []
+                    seen = set()
+                    for hit in results:
+                        url = hit.get('url')
+                        if not url or url in seen:
+                            continue
+                        seen.add(url)
+                        c = Course.objects.filter(url=url).first()
+                        if not c:
+                            continue
+                        if c.id == course.id:
+                            continue
+
+                        setattr(c, 'match_reasons', generate_match_reasons_details(course, c))
+                        similar_list.append(c)
+
+                    # attach global rank (1 = best)
+                    for idx, c in enumerate(similar_list, start=1):
+                        try:
+                            setattr(c, 'rank', idx)
+                        except Exception:
+                            pass
+
+                    similar_courses = similar_list
+        except Exception as e:
+            print(f"Whoosh similar courses error: {e}")
+            similar_courses = Course.objects.none()
+
+    return similar_courses
+
+def next_steps_given_course(course):
+    """ 
+    Using Whoosh, obtain courses that share keywords and category but are of higher level.
+    And that have been scrapped in the last 30 days.
+    """
+
+    ix = open_whoosh()
+    next_courses = Course.objects.none()
+
+    with ix.searcher() as searcher:
+        query_parts = []
+
+        # Category name
+        cat_name = None
+        if getattr(course, 'category', None):
+            cat_name = getattr(course.category, 'name', None) or str(course.category)
+        if cat_name:
+            query_parts.append(Term('category', cat_name.lower()))
+
+        # Keywords
+        keywords = extract_keywords(course.title, course.description)
+        keyword_boost = 2.0 / len(keywords) if keywords else 1.0
+        keyword_terms = [Term('keywords', kw.strip().lower(), boost=keyword_boost) for kw in keywords if kw.strip()]
+
+        # Level higher than current course
+        level_order = {'beginner': 1, 'intermediate': 2, 'advanced': 3}
+        current_level_value = level_order.get((course.level or '').lower(), 0)
+        higher_levels = [lvl for lvl, val in level_order.items() if val > current_level_value]
+        level_terms = [Term('level', lvl) for lvl in higher_levels]
+
+        # Last scraped in the last 30 days
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        query_parts.append(NumericRange('last_scraped', thirty_days_ago.timestamp(), None))
+
+        # Build final query
+        final_query = None
+        all_parts = []
+        if query_parts:
+            all_parts.extend(And(query_parts))
+        if keyword_terms:
+            all_parts.append(Or(keyword_terms))
+        if level_terms:
+            all_parts.append(Or(level_terms))
+        
+        if all_parts:
+            final_query = And(all_parts)
+
+        if final_query is None:
+            next_courses = Course.objects.none()
+        else:
+            results = searcher.search(final_query, limit=3)
+
+            next_list = []
+            seen = set()
+            for hit in results:
+                url_c = hit.get('url')
+                if not url_c or url_c in seen:
+                    continue
+                seen.add(url_c)
+                c = Course.objects.filter(url=url_c).first()
+                if not c:
+                    continue
+                if c.id == course.id:
+                    continue
+                next_list.append(c)
+
+            next_courses = next_list
+    return next_courses
 
 def about(request):
     return render(request, 'main/about.html')

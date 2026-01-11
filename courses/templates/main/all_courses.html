@@ -128,8 +128,8 @@
                         </div>
                     </div>
                     <div class="text-md-end mt-3 mt-md-0">
-                        {% if user.is_authenticated %}
                         <div class="d-flex flex-column align-items-end gap-2 mb-2">
+                            {% if user.is_authenticated %}
                             <div class="d-flex gap-2">
                                 <form method="post"
                                     action="{% url 'toggle_feedback' course.id 'like' %}"
@@ -157,14 +157,13 @@
                                     </button>
                                 </form>
                             </div>
-
+                            {% endif %}
 
                             <div class="d-flex flex-column flex-md-row align-items-center justify-content-end gap-2">
                                 <a href="{{ course.url }}" class="btn btn-sm btn-primary mb-2 mb-md-0" target="_blank" rel="noopener">Ir al curso</a>
                                 <a href="{% url 'course_detail' course.id %}" class="btn btn-sm btn-outline-secondary">Ver detalle</a>
                             </div>
                         </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>

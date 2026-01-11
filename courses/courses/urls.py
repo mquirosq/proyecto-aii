@@ -14,6 +14,7 @@ urlpatterns = [
     path('courses/', main_views.all_courses, name='all_courses'),
     path('courses/<int:course_id>/', main_views.course_detail, name='course_detail'),
     path('populate/', main_views.populate_with_data, name='populate'),
+    path('load-recommender-data/', main_views.load_recommender_data, name='load_recommender_data'),
     path('about/', main_views.about, name='about'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('signup/', main_views.signup, name='signup'),
