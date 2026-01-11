@@ -1,11 +1,11 @@
 from .models import UserCourse, Course
-from collections import Counter
-from scrapping.utils import extract_keywords
+from whoosh.query import Term
 from collections import defaultdict
 import math
 from django.utils import timezone
 from django.db.models import Q
 import shelve
+from .populateDB import open_whoosh
 
 SHELVE_FILE = "precomputed_recommender_system_courses.db"
 
@@ -63,7 +63,18 @@ def course_features(course):
         features.append(dur_feat)
 
     # Keywords
-    for kw in extract_keywords(course.title, course.description or ""):
+    ix = open_whoosh()
+    keywords = []
+    with ix.searcher() as searcher:
+
+        base_query = Term('url', course.url)
+        base_results = searcher.search(base_query, limit=1)
+
+        if base_results:
+            raw_base = base_results[0].get('keywords', '') or ''
+            keywords = [kw.strip().lower() for kw in raw_base.split(',') if kw.strip()]
+
+    for kw in keywords:
         features.append(f"kw:{kw}")
 
     return features

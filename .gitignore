@@ -39,11 +39,7 @@ Thumbs.db
 
 # Data
 *.csv
-*.dat
 *.log
 data/
 
 # Other:
-*.sqlite3
-*.db
-whoosh_index/
