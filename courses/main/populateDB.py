@@ -4,6 +4,7 @@ from whoosh.fields import Schema, TEXT, ID, NUMERIC, KEYWORD, DATETIME
 from scrapping import coursera_scrapper, edx_scrapper, openLearn_scrapper
 from .models import Course, Platform, Category, Instructor
 from django.utils import timezone
+from scrapping.utils import extract_keywords, compute_idf
 
 DB_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "courses.db"))
 WHOOSH_INDEX_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "whoosh_index"))
@@ -56,8 +57,8 @@ def init_whoosh(index_dir=WHOOSH_INDEX_DIR):
     # Define schema
     schema = Schema(
         url=ID(stored=True, unique=True),
-        title=TEXT(stored=True),
-        description=TEXT(stored=True),
+        title=TEXT(stored=False),
+        description=TEXT(stored=False),
         category=KEYWORD(stored=False, lowercase=True),
         level = KEYWORD(lowercase=True, stored=False),
         platform=KEYWORD(lowercase=True, stored=False),
@@ -86,7 +87,6 @@ def open_whoosh(index_dir=WHOOSH_INDEX_DIR):
 def index_courses(courses, ix):
     writer = ix.writer()
 
-    print("WHOOSH")
     for course in courses:
         writer.update_document(
             url=course["url"],
@@ -141,6 +141,12 @@ def run_scrapers(scrapers=None):
     # Save to DB
     save_courses_dB(all_courses)
     print("Courses saved to database.")
+
+    # Add keywords
+    idf = compute_idf()
+
+    for course in all_courses:
+        course["keywords"] = extract_keywords(course["title"], course["description"], idf)
 
     # Index to Whoosh
     open_ix = open_whoosh()

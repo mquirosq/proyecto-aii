@@ -1,6 +1,11 @@
 import nltk
 from nltk.corpus import stopwords
 from nltk import data
+from collections import Counter
+import math
+import re
+from collections import Counter, defaultdict
+from main.models import Course
 
 # STOPWORDS -----------------
 
@@ -23,6 +28,7 @@ STOPWORDS.update({"course", "learn", "program", "certification", "certificate", 
                   "work", "works", "real-world", "real", "world", "case", "cases", "case studies", "study",
                   "basic", "part", "parts", "introduction", "intros", "intro", "become", "enroll", "free"})
 
+
 def clean_text(text):
     """
     Clean text to extract keywords:
@@ -35,15 +41,48 @@ def clean_text(text):
     return text
 
 
-def extract_keywords(title, description, top_n=20):
-    text = f"{title} {description}" if description else title
-    text = clean_text(text)
-    tokens = [w for w in text.split() if w not in STOPWORDS and len(w) > 2]
-    
-    from collections import Counter
-    counts = Counter(tokens)
-    return [w for w, _ in counts.most_common(top_n)]
+# Extract keywords using TF-IDF
 
+def tokenize(text):
+    text = clean_text(text)
+    return [w for w in text.split() if w not in STOPWORDS and len(w) > 2]
+
+def compute_idf():
+    """
+    Compute IDF of documents in db.
+    """
+    courses = Course.objects.all()
+    texts = []
+    for item in courses:
+        texts.append(f"{item.title or ''} {item.description or ''}")
+
+    N = len(texts) if texts else 1
+    df = defaultdict(int)
+
+    for text in texts:
+        for term in set(tokenize(text)):
+            df[term] += 1
+
+    idf = {
+        term: math.log(N / (1 + freq))
+        for term, freq in df.items()
+    }
+    return idf
+
+def extract_keywords(title, description, idf, top_n=10):
+    text = f"{title} {description}" if description else title
+    tokens = tokenize(text)
+
+    tf = Counter(tokens)
+    scores = {
+        term: tf[term] * idf.get(term, 0)
+        for term in tf
+    }
+
+    return [
+        term for term, _ in
+        sorted(scores.items(), key=lambda x: x[1], reverse=True)[:top_n]
+    ]
 
 
 # CATEGORY MAPPING -----------------

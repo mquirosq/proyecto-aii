@@ -1,8 +1,14 @@
 from .base_scrapper import BaseScraper
-from urllib import request
+from urllib import request, error
 from bs4 import BeautifulSoup
 import re
-from .utils import extract_keywords, map_category
+from .utils import map_category
+
+# Default headers to avoid simple bot-blocking and bad gateway from some hosts
+DEFAULT_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36',
+    'Accept-Language': 'en-US,en;q=0.9',
+}
 
 BASE_URL = "https://www.open.edu"
 
@@ -11,8 +17,24 @@ END_FILTERS_CATEGORY_URL = "all-content?filter=date/grid/all/freecourses/all/all
 class openLearnScraper(BaseScraper):
     def fetch(self):
         url = "https://www.open.edu/openlearn/subject-information"
-        response = request.urlopen(url)
-        return response.read().decode('utf-8')
+        resp = self.fetch_url(url)
+        return resp.decode('utf-8') if resp else ""
+
+    def fetch_url(self, url, timeout=20):
+        """Fetch a URL using a request with headers. Returns bytes or None on error."""
+        try:
+            req = request.Request(url, headers=DEFAULT_HEADERS)
+            with request.urlopen(req, timeout=timeout) as resp:
+                return resp.read()
+        except error.HTTPError as e:
+            print(f"HTTPError fetching {url}: {e.code} {e.reason}")
+            return None
+        except error.URLError as e:
+            print(f"URLError fetching {url}: {e.reason}")
+            return None
+        except Exception as e:
+            print(f"Unexpected error fetching {url}: {e}")
+            return None
 
     def parse(self, html):
         soup = BeautifulSoup(html, "html.parser")
@@ -33,8 +55,11 @@ class openLearnScraper(BaseScraper):
         return courses
     
     def extract_category_course_info(self, url, courses, category):
-        response = request.urlopen(url)
-        html = response.read().decode('utf-8')
+        resp = self.fetch_url(url)
+        if not resp:
+            print(f"Skipping category {category}: could not fetch {url}")
+            return
+        html = resp.decode('utf-8')
         soup = BeautifulSoup(html, "html.parser")
 
         max_pages = soup.find('span', class_='current-of-total')
@@ -49,14 +74,17 @@ class openLearnScraper(BaseScraper):
         for page in range(0, max_pages ):
             print(f"  Scraping page {page + 1} of {max_pages} for category {category}")
             paged_url = f"{url}&page={page}"
-            response = request.urlopen(paged_url)
-            page_html = response.read().decode('utf-8')
+            resp = self.fetch_url(paged_url)
+            if not resp:
+                print(f"  Skipping page {page + 1} for category {category}: could not fetch {paged_url}")
+                continue
+            page_html = resp.decode('utf-8')
             page_soup = BeautifulSoup(page_html, "html.parser")
             page_courses = page_soup.find_all('div', class_='ser-grid-item')
 
             for course in page_courses:
                 course_url = course.find('a', href=True).get('href')
-                # make course URL absolute when needed
+                # Make course URL absolute if needed (fallback)
                 if course_url and not course_url.startswith('http'):
                     course_url = BASE_URL + course_url
                 print(f"  Scraping course: {course_url}")
@@ -73,8 +101,11 @@ class openLearnScraper(BaseScraper):
                 if course_category.lower() != category.lower():
                     continue
 
-                course_page = request.urlopen(course_url)
-                course_html = course_page.read().decode('utf-8')
+                resp = self.fetch_url(course_url)
+                if not resp:
+                    print(f"    Skipping course {course_url}: could not fetch page")
+                    continue
+                course_html = resp.decode('utf-8')
                 course_soup = BeautifulSoup(course_html, "html.parser")
 
                 h1 = course_soup.find("h1", property="schema:name")
@@ -84,13 +115,19 @@ class openLearnScraper(BaseScraper):
                 rating = rating_element.get_text().strip() if rating_element else None
 
                 description_all = course_soup.find('div', class_='openlearn-enrol-intro')
+                text = None
                 if description_all:
                     paragraphs = description_all.find_all('p')
                 else:
                     summary_div = course_soup.find('div', id='summary_content')
                     paragraphs = summary_div.find_all('p') if summary_div else []
+                    if len(paragraphs) == 0:
+                        text = summary_div.text if summary_div and summary_div.text else []
                     description_all = course_soup.find('div', id='summary_content').find_all('p')
+                
                 description = " ".join([p.get_text(strip=True) for p in paragraphs]) if paragraphs else None
+                if description is None and text is not None:
+                    description = text.strip()
                 
                 instructor = None
 
@@ -104,7 +141,6 @@ class openLearnScraper(BaseScraper):
                     "rating": rating,
                     "url": course_url,
                     "category": category,
-                    "keywords": extract_keywords(title, description) if description else extract_keywords(title, ""),
                     "last_scraped": self.get_current_datetime()
                 })
 

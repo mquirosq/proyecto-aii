@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import re
 import time
 import socket
-from .utils import extract_keywords, map_category
+from .utils import map_category
 
 BASE_URL = "https://www.coursera.org"
 
@@ -46,7 +46,7 @@ class CourseraScraper(BaseScraper):
         soup = BeautifulSoup(html, "html.parser")
         courses = []
 
-        # Collect browse links (categories), only '/browse/segment' or '/browse/segment/subsegment'
+        # Collect browse links (categories)
         pattern = re.compile(r"^/browse/[^/?]+(?:/[^/?]+)?(?:\\?.*)?$")
         categories_urls = set()
         for a in soup.find_all("a", href=pattern):
@@ -136,7 +136,6 @@ class CourseraScraper(BaseScraper):
                 "rating": rating,
                 "url": url,
                 "category": category,
-                "keywords": extract_keywords(title, description) if description else extract_keywords(title, ""),
                 "last_scraped": self.get_current_datetime()
             })
 

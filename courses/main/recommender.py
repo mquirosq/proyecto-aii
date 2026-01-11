@@ -55,8 +55,9 @@ def recommend_hybrid(user, limit=10):
 
     interactions_count = UserCourse.objects.filter(user=user).count()
 
-    if interactions_count < 3: # Cold start - we need more data from the user
-        results =recommend_for_anonymous(limit=limit + 3)
+    # Cold start - we need more data from the user
+    if interactions_count < 3:
+        results = recommend_for_anonymous(limit=limit + 3)
         results = [r for r in results if r['course'].id not in 
                    UserCourse.objects.filter(user=user).values_list('course_id', flat=True)]
         return results[:limit]
